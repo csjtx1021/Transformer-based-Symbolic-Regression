@@ -74,7 +74,7 @@ def opt_constant_batch(expressions_batch, data, device):
     #for p in mod.parameters():
     #    print(p)
     
-    optim = torch.optim.Adam(mod.parameters(), lr=1e-1)
+    optim = torch.optim.Adam(mod.parameters(), lr=5e-2)
     # optim = torch.optim.SGD(mod.parameters(), lr=1e-1)
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, factor=0.9, patience=20)
 
@@ -94,7 +94,7 @@ def opt_constant_batch(expressions_batch, data, device):
         #print(out)
 
         # loss = torch.sum(torch.mean((out - y_truth) ** 2, dim=0))
-        loss_each = torch.mean((out - Y) ** 2, dim=0)
+        loss_each = torch.log(torch.mean((out - Y) ** 2, dim=0) + 1.)
         loss = torch.mean(loss_each)
         # loss = torch.sum(torch.mean(torch.abs(out - y_truth)/torch.abs(y_truth), dim=0))
         
@@ -112,7 +112,7 @@ def opt_constant_batch(expressions_batch, data, device):
             print('epoch #%s, loss = %.5f, time cost = %.2f' % (epoch, loss.item(), time.time() - aa))
             if early_stopping.early_stop:
                 print("Early stopping")
-            return [str(expr_i) for expr_i in mod.sympy()], loss_each.detach().cpu().numpy()
+            return [str(expr_i) for expr_i in mod.sympy()], loss_each.detach().exp().cpu().numpy() - 1.
 
 
 if __name__ == "__main__":
